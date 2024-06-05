@@ -49,20 +49,12 @@ async function run(): Promise<void> {
     }
 
     if (scanOnlyChangedFiles) {
-      if (github.context.eventName === 'pull_request') {
-        let output = '';
-        const options = {
-          listeners: {
-            stdout: (data: Buffer) => {
-              output += data.toString()
-            }
-          }
-        }
-      
+      if (github.context.eventName === 'pull_request') {      
         const prPayload = github.context.payload as PullRequestEvent
-        await exec.exec('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha], options);
+        const {stdout, stderr} = await exec.getExecOutput('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha]);
         core.info("Printing diff files")
-        core.info(output)
+        core.info(stdout)
+        core.info(stderr)
       }
       // core.info(JSON.stringify(github.context.action))
     }
