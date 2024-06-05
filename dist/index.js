@@ -479,8 +479,13 @@ function run() {
             if (scanChangedFilesOnly) {
                 if (github.context.eventName === 'pull_request') {
                     const prPayload = github.context.payload;
+                    // Fetch till PR start
+                    const commits = prPayload.pull_request.commits;
+                    yield exec.getExecOutput('git', ['fetch', `--depth=${commits}`]);
+                    // Get file with diffs
                     const { stdout } = yield exec.getExecOutput('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha]);
                     const files = stdout.split(/\r?\n/);
+                    // Add to inclusions
                     Object.assign(options, {
                         'sonar.inclusions': files.join(',')
                     });
