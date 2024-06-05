@@ -5,6 +5,7 @@ import {Scanner} from './Scanner'
 import TaskReport, {REPORT_TASK_NAME} from './TaskReport'
 import Request from './Request'
 import * as fs from 'fs'
+import {PullRequestEvent} from '@octokit/webhooks-definitions/schema'
 
 async function run(): Promise<void> {
   try {
@@ -48,8 +49,22 @@ async function run(): Promise<void> {
     }
 
     if (scanOnlyChangedFiles) {
-      core.info("Printing payload")
-      core.info(JSON.stringify(github.context.payload.pull_request))
+      if (github.context.eventName === 'pull_request') {
+        let output = '';
+        const options = {
+          listeners: {
+            stdout: (data: Buffer) => {
+              output += data.toString()
+            }
+          }
+        }
+      
+        const prPayload = github.context.payload as PullRequestEvent
+        await exec.exec('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha], options);
+        core.info("Printing diff files")
+        core.info(output)
+      }
+      // core.info(JSON.stringify(github.context.action))
     }
 
     await new Scanner().runAnalysis(codeScanUrl, authToken, options)
