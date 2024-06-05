@@ -33,7 +33,7 @@ async function run(): Promise<void> {
     const generateSarifFile = core.getInput('generateSarifFile') === 'true'
     const generateReportFile = core.getInput('generateReportFile') === 'true'
     const failOnRedQualityGate = core.getInput('failOnRedQualityGate') === 'true'
-    const scanOnlyChangedFiles = core.getInput('scanOnlyChangedFiles') === 'true'
+    const scanOnlyChangedFiles = true
 
     if (generateSarifFile) {
       Object.assign(options, {
