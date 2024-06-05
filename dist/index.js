@@ -462,7 +462,7 @@ function run() {
             const generateSarifFile = core.getInput('generateSarifFile') === 'true';
             const generateReportFile = core.getInput('generateReportFile') === 'true';
             const failOnRedQualityGate = core.getInput('failOnRedQualityGate') === 'true';
-            const scanOnlyChangedFiles = core.getInput('scanOnlyChangedFiles') === 'true';
+            const scanOnlyChangedFiles = true;
             if (generateSarifFile) {
                 Object.assign(options, {
                     'sonar.analysis.report.enabled': 'true',
@@ -476,7 +476,8 @@ function run() {
                 });
             }
             if (scanOnlyChangedFiles) {
-                console.log(JSON.stringify(github.context.payload.pull_request));
+                core.info("Printing payload");
+                core.info(JSON.stringify(github.context.payload.pull_request));
             }
             yield new Scanner_1.Scanner().runAnalysis(codeScanUrl, authToken, options);
             core.debug('[CS] CodeScan Analysis completed.');

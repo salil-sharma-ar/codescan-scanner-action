@@ -48,8 +48,8 @@ async function run(): Promise<void> {
     }
 
     if (scanOnlyChangedFiles) {
-      console.log("Printing payload")
-      console.log(JSON.stringify(github.context.payload.pull_request))
+      core.info("Printing payload")
+      core.info(JSON.stringify(github.context.payload.pull_request))
     }
 
     await new Scanner().runAnalysis(codeScanUrl, authToken, options)
