@@ -1,4 +1,6 @@
 import * as core from '@actions/core'
+import * as exec from '@actions/exec'
+import * as github from '@actions/github'
 import {Scanner} from './Scanner'
 import TaskReport, {REPORT_TASK_NAME} from './TaskReport'
 import Request from './Request'
@@ -31,6 +33,7 @@ async function run(): Promise<void> {
     const generateSarifFile = core.getInput('generateSarifFile') === 'true'
     const generateReportFile = core.getInput('generateReportFile') === 'true'
     const failOnRedQualityGate = core.getInput('failOnRedQualityGate') === 'true'
+    const scanOnlyChangedFiles = core.getInput('scanOnlyChangedFiles') === 'true'
 
     if (generateSarifFile) {
       Object.assign(options, {
@@ -42,6 +45,10 @@ async function run(): Promise<void> {
         'codescan.reports.enabled': 'true',
         'codescan.reports.types': 'sarif'
       })
+    }
+
+    if (scanOnlyChangedFiles) {
+      console.log(JSON.stringify(github.context.payload.pull_request))
     }
 
     await new Scanner().runAnalysis(codeScanUrl, authToken, options)
