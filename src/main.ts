@@ -34,7 +34,7 @@ async function run(): Promise<void> {
     const generateSarifFile = core.getInput('generateSarifFile') === 'true'
     const generateReportFile = core.getInput('generateReportFile') === 'true'
     const failOnRedQualityGate = core.getInput('failOnRedQualityGate') === 'true'
-    const scanOnlyChangedFiles = true
+    const scanChangedFilesOnly = core.getInput('scanChangedFilesOnly') === 'true'
 
     if (generateSarifFile) {
       Object.assign(options, {
@@ -48,15 +48,16 @@ async function run(): Promise<void> {
       })
     }
 
-    if (scanOnlyChangedFiles) {
+    if (scanChangedFilesOnly) {
       if (github.context.eventName === 'pull_request') {      
         const prPayload = github.context.payload as PullRequestEvent
-        const {stdout, stderr} = await exec.getExecOutput('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha]);
+        const {stdout} = await exec.getExecOutput('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha]);
         core.info("Printing diff files")
-        core.info(stdout)
-        core.info(stderr)
+        const diffFiles = stdout.split('/\r?\n/');
+        Object.assign(options, {
+          'sonar.inclusions': diffFiles.join(',')   
+        })
       }
-      // core.info(JSON.stringify(github.context.action))
     }
 
     await new Scanner().runAnalysis(codeScanUrl, authToken, options)
