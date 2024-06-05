@@ -52,10 +52,9 @@ async function run(): Promise<void> {
       if (github.context.eventName === 'pull_request') {      
         const prPayload = github.context.payload as PullRequestEvent
         const {stdout} = await exec.getExecOutput('git', ['diff', '--name-only', prPayload.pull_request.head.sha, prPayload.pull_request.base.sha]);
-        core.info("Printing diff files")
-        const diffFiles = stdout.split('/\r?\n/');
+        const files = stdout.split(/\r?\n/);
         Object.assign(options, {
-          'sonar.inclusions': diffFiles.join(',')   
+          'sonar.inclusions': files.join(',')   
         })
       }
     }
